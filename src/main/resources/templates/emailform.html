@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Creation du mail</title>
+</head>
+<body>
+    <form th:action="@{/create}" method="POST" th:object="${form}">
+        <p>Reveiver Name<input type="text" th:field="*{userInfo.name}"></p>
+        <p>Reveiver Username<input type="text" th:field="*{userInfo.username}"></p>
+        <p>Reveiver Email<input type="email" th:field="*{userInfo.email}"></p>
+        <p>Mail Subject<input type="text" th:field="*{mailSubject}"></p>
+        <select th:field="*{mailTemplate.templateName}">
+            <option value="email.ftlh">Template de Salutation</option>
+            <option value="email2.ftlh">Template de Remerciements</option>
+        </select>
+
+        <input type="submit" value="Ok">
+    </form>
+
+</body>
+</html>
