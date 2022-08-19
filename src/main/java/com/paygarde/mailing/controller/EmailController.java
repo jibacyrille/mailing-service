@@ -20,32 +20,13 @@ public class EmailController {
         this.emailService = emailService;
     }
 
-    @PostMapping("/register")
+    @PostMapping("/sendemail")
     @ResponseBody
-    public String register(@RequestBody MailInfo mailInfo) throws Exception {
+    public String sendEmail(@RequestBody MailInfo mailInfo) throws Exception {
         emailService.sendEmail(mailInfo);
 
-        System.out.println("la methode register a ete invoque");
+        System.out.println("la methode sendEmail du controller a ete invoquee");
         return "message-sent";
     }
 
-    @PostMapping("/create")
-    public String createMailInfo(@ModelAttribute("form") MailInfo mailInfo) throws Exception {
-        emailService.sendEmail(mailInfo);
-
-        System.out.println("la methode createUseForm a ete invoque donc le message a ete envoye");
-        return "message-sent";
-    }
-
-    @GetMapping("/home")
-    public String displayHome(){
-        System.out.println("La methode displayHome a été invoquée");
-        return "index";
-    }
-
-    @RequestMapping("/create-form")
-    public String displayEmailForm(@ModelAttribute("form") MailInfo mailInfo){
-        System.out.println("La methode displayEmailForm a été invoquée");
-        return "emailform";
-    }
 }

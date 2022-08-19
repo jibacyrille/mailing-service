@@ -7,12 +7,13 @@
     <title>Spring Boot Email using FreeMarker</title>
 </head>
 <body>
-<h1> ICI IL s'agit du template de salutations</h1>
+<h1> <font color="green"> Ici iL s'agit du template de salutations</font></h1>
 <hr>
 <div style="margin-top: 10px">Greetings, ${mailInfo.userInfo.name}</div>
 <div>Votre nom d'utilisateur est: <b>${mailInfo.userInfo.username}</b></div>
 <div>Votre adresse est: <b>${mailInfo.userInfo.email}</b></div>
 <br/>
 <div> Have a nice day..!</div>
+<br/>
 </body>
 </html>
