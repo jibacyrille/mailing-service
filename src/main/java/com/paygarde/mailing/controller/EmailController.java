@@ -21,7 +21,7 @@ public class EmailController {
     }
 
     @PostMapping("/sendemail")
-    @ResponseBody
+    //@ResponseBody
     public String sendEmail(@RequestBody MailInfo mailInfo) throws Exception {
         emailService.sendEmail(mailInfo);
 
