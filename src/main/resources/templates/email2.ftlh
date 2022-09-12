@@ -9,9 +9,9 @@
 <body>
 <h1> <font color="red">Ici iL s'agit du template d'avertissement</font></h1>
 <hr>
-<div style="margin-top: 10px">Attention, ${mailInfo.userInfo.name}</div>
-<div>Votre nom d'utilisateur est: <b>${mailInfo.userInfo.username}</b></div>
-<div>Votre adresse est: <b>${mailInfo.userInfo.email}</b></div>
+<div style="margin-top: 10px">Attention, ${name}</div>
+<div>Votre nom d'utilisateur est: <b>${username}</b></div>
+<div>Votre adresse est: <b>${email}</b></div>
 <br/>
 <div> Attention à ce que vous faites!</div>
 </body>

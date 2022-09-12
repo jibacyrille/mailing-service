@@ -1,6 +1,5 @@
 package com.paygarde.mailing.services;
 
-import com.paygarde.mailing.models.MailInfo;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,10 +17,10 @@ import java.util.Map;
 @Service
 public class EmailServiceImpl implements EmailServiceInterface{
 
-    @Autowired
-    final Configuration configuration;
-    @Autowired
-    final JavaMailSender javaMailSender;
+    //@Autowired
+    private final Configuration configuration;
+    //@Autowired
+    private final JavaMailSender javaMailSender;
 
     public EmailServiceImpl(Configuration configuration, JavaMailSender javaMailSender) {
         this.configuration = configuration;
@@ -29,25 +28,15 @@ public class EmailServiceImpl implements EmailServiceInterface{
     }
 
     @Override
-    public void sendEmail(MailInfo mailInfo) throws MessagingException, IOException, TemplateException {
+    public void sendEmail(Map<String, Object>mailInfo) throws MessagingException, IOException, TemplateException {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage);
-        //helper.setSubject("Welcome To SpringHow.com(LE TUTO QUE TU AS ENVOYE)");
-        helper.setTo(mailInfo.getUserInfo().getEmail());
-        helper.setSubject(mailInfo.getMailSubject());
-        String emailContent = getEmailContent(mailInfo);
+        helper.setTo(mailInfo.get("email").toString());
+        helper.setSubject(mailInfo.get("mailSubject").toString());
+        StringWriter stringWriter = new StringWriter();
+        configuration.getTemplate(mailInfo.get("templateName").toString()).process(mailInfo, stringWriter);
+        String emailContent = stringWriter.getBuffer().toString();
         helper.setText(emailContent, true);
         javaMailSender.send(mimeMessage);
     }
-
-    @Override
-    public String getEmailContent(MailInfo mailInfo) throws IOException, TemplateException {
-        StringWriter stringWriter = new StringWriter();
-        Map<String, Object> model = new HashMap<>();
-        model.put("mailInfo", mailInfo);
-        //configuration.getTemplate("email.ftlh").process(model, stringWriter);
-        configuration.getTemplate(mailInfo.getMailTemplate().getTemplateName()).process(model, stringWriter);
-        return stringWriter.getBuffer().toString();
-    }
-
 }
