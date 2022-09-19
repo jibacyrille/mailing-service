@@ -1,5 +1,6 @@
 package com.paygarde.mailing.controller;
 
+import com.paygarde.mailing.model.MailInfo;
 import com.paygarde.mailing.services.EmailServiceInterface;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
@@ -22,7 +23,7 @@ public class EmailController {
     Map<String, Object> model = new HashMap<>();
     @PostMapping("/sendemail")
     //@ResponseBody
-    public String sendEmail(@RequestBody Map<String, Object> mailInfo) throws Exception {
+    public String sendEmail(@RequestBody MailInfo mailInfo) throws Exception {
         emailService.sendEmail(mailInfo);
         LOGGER.log( Level.INFO, "la methode sendEmail du controller a ete invoquee" );
         return "message-sent";
