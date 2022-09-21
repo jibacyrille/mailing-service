@@ -24,9 +24,15 @@ public class EmailController {
     @PostMapping("/sendemail")
     //@ResponseBody
     public String sendEmail(@RequestBody MailInfo mailInfo) throws Exception {
-        emailService.sendEmail(mailInfo);
+        Boolean res=emailService.sendEmail(mailInfo);
         LOGGER.log( Level.INFO, "la methode sendEmail du controller a ete invoquee" );
-        return "message-sent";
+        if(res){
+            return "message sent successfully";
+
+        }else {
+            return "couldn't send the message. Some attached files have not been loaded";
+        }
+
     }
 
 }
