@@ -26,10 +26,25 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation:2.7.2'
     implementation 'commons-io:commons-io:2.6'
 
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    implementation 'org.slf4j:slf4j-api:2.0.2'
+
     // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-api
     implementation 'org.apache.logging.log4j:log4j-api:2.18.0'
     // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-core
     implementation 'org.apache.logging.log4j:log4j-core:2.18.0'
+    // https://mvnrepository.com/artifact/org.modelmapper/modelmapper
+   // implementation 'org.modelmapper:modelmapper:3.1.0'
+
+    implementation 'org.mapstruct:mapstruct:1.5.2.Final'
+    annotationProcessor 'org.mapstruct:mapstruct-processor:1.5.2.Final'
+
+
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+   // implementation 'org.slf4j:slf4j-api:2.0.2'
+    implementation 'org.slf4j:slf4j-api:1.7.18'
+
+
 
 
 
@@ -37,7 +52,10 @@ dependencies {
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test:2.7.2'
+
 }
+
+
 
 tasks.named('test') {
     useJUnitPlatform()

@@ -1,22 +1,27 @@
 package com.paygarde.mailing.filesmanager;
 
+import com.paygarde.mailing.exceptions.AttachmentMaxSizeExcededException;
+import com.paygarde.mailing.exceptions.MalformedUrlException;
 import org.springframework.mail.javamail.MimeMessageHelper;
 
 import javax.mail.MessagingException;
 import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Path;
 
 
 public interface FileManagerInterface {
 
     public boolean deleteFile(File element);
 
-    public File createFolder(String folderName);
+    public Path createFolder(String folderName) ;
 
     public File downloadFile(File tempFolder, String fileUrl);
 
     public boolean urlIsValid(String url);
 
-    public double fileSize(File f);
+    public long fileSize(File f);
 
-    public boolean attachFiles(String []urls,File tempFolder,MimeMessageHelper helper) throws MessagingException;
+    public boolean attachFiles(String []urls,Path tempFolder,MimeMessageHelper helper) throws MessagingException, MalformedUrlException, AttachmentMaxSizeExcededException, MalformedURLException;
 }

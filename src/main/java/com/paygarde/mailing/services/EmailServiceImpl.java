@@ -2,9 +2,11 @@ package com.paygarde.mailing.services;
 
 import com.paygarde.mailing.filesmanager.FileManagerInterface;
 import com.paygarde.mailing.model.MailInfo;
+import com.paygarde.mailing.results.MailStatus;
+import com.paygarde.mailing.results.ResultDto;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
-import org.springframework.beans.factory.annotation.Autowired;
+//import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -16,7 +18,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.logging.Logger;
+import java.nio.file.Path;
+import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class EmailServiceImpl implements EmailServiceInterface {
@@ -25,8 +29,8 @@ public class EmailServiceImpl implements EmailServiceInterface {
     private final Configuration configuration;
     //@Autowired
     private final JavaMailSender javaMailSender;
-    @Autowired
-    private FileManagerInterface fileManager;
+   // @Autowired
+    private final FileManagerInterface fileManager;
 
     @Value("${email.template}")
     private String templateFolder;
@@ -34,9 +38,10 @@ public class EmailServiceImpl implements EmailServiceInterface {
     @Value("${email.attachment.folder.path}")
     private String tempFolderPath;
 
-    public EmailServiceImpl(Configuration configuration, JavaMailSender javaMailSender) {
+    public EmailServiceImpl(Configuration configuration, JavaMailSender javaMailSender, FileManagerInterface fileManager) {
         this.configuration = configuration;
         this.javaMailSender = javaMailSender;
+        this.fileManager = fileManager;
     }
 
     String name, username, email, mailSubject, templateName;
@@ -44,9 +49,20 @@ public class EmailServiceImpl implements EmailServiceInterface {
 
 
     @Override
-    public boolean sendEmail(MailInfo mailInfo) throws MessagingException, IOException, TemplateException {
+    public ResultDto sendEmail(MailInfo mailInfo) throws MessagingException, IOException, TemplateException {
 
-        File tempFolder = fileManager.createFolder(tempFolderPath);
+        //ModelMapper modelMapper = new ModelMapper();
+        //ResultDto resultDto=modelMapper.map(mailInfo, ResultDto.class);
+        ResultDto resultDto=new ResultDto();
+        resultDto.setMailInfo(mailInfo);
+
+        String emailId = UUID.randomUUID().toString();
+        Date emailCreationTime=new Date();
+        resultDto.setUid(emailId);
+        resultDto.setCreationDataTime(emailCreationTime);
+        resultDto.setStatus(MailStatus.CREATED);
+
+        Path tempFolder = fileManager.createFolder(tempFolderPath);
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                 StandardCharsets.UTF_8.name());
@@ -60,18 +76,23 @@ public class EmailServiceImpl implements EmailServiceInterface {
         String emailContent = stringWriter.getBuffer().toString();
         helper.setText(emailContent, true);
 
+
         boolean res=fileManager.attachFiles(mailInfo.getFilesUrl(), tempFolder, helper);
         if(res){
+
             javaMailSender.send(mimeMessage);
-            fileManager.deleteFile(tempFolder);
-            return true;
+            fileManager.deleteFile(tempFolder.toFile());
+            resultDto.setStatus(MailStatus.CLOSED);
+            resultDto.setMessage("Message sent successfully");
+
 
         }else {
-            fileManager.deleteFile(tempFolder);
-            return false;
+            fileManager.deleteFile(tempFolder.toFile());
+            resultDto.setStatus(MailStatus.FAILED);
+            resultDto.setMessage("Couldn't send the message");
         }
 
-
+        return resultDto;
     }
 
 

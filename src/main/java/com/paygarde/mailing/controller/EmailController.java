@@ -1,14 +1,22 @@
 package com.paygarde.mailing.controller;
 
 import com.paygarde.mailing.model.MailInfo;
+import com.paygarde.mailing.results.*;
 import com.paygarde.mailing.services.EmailServiceInterface;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+//import org.modelmapper.ModelMapper;
+import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,22 +25,40 @@ public class EmailController {
 
     private static final Logger LOGGER =  LogManager.getLogger( EmailController.class );
 
+    //@Autowired
+    //private ResultMapper resultDtoToResult;
 
     @Autowired
     private EmailServiceInterface emailService;
     Map<String, Object> model = new HashMap<>();
+
     @PostMapping("/sendemail")
     //@ResponseBody
-    public String sendEmail(@RequestBody MailInfo mailInfo) throws Exception {
-        Boolean res=emailService.sendEmail(mailInfo);
-        LOGGER.log( Level.INFO, "la methode sendEmail du controller a ete invoquee" );
-        if(res){
-            return "message sent successfully";
+    public ResponseEntity<Result> sendEmail(@RequestBody MailInfo mailInfo) throws Exception {
+        ResultDto resultDto=emailService.sendEmail(mailInfo);
+
+        System.out.println(resultDto.getMailInfo().getMailSubject());
+        System.out.println(Arrays.toString(resultDto.getMailInfo().getFilesUrl()));
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
+
+        //ModelMapper modelMapper = new ModelMapper();
+        //Result result=resultDtoToResult.resultDtoToResult(resultDto);
+        Result result=ResultMapper.INSTANCE.resultDtoToResult(resultDto);
+        //CarDto carDto = CarMapper.INSTANCE.carToCarDto( car );
+        System.out.println(result.getMessage());
+
+
+        if(result.getStatus().equals(MailStatus.CLOSED)){
+            return new ResponseEntity<Result>(result, headers,HttpStatus.OK);
 
         }else {
-            return "couldn't send the message. Some attached files have not been loaded";
+            return new ResponseEntity<Result>(result, headers, HttpStatus.BAD_REQUEST);
         }
 
     }
+
 
 }
