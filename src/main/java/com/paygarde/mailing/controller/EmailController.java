@@ -6,14 +6,11 @@ import com.paygarde.mailing.services.EmailServiceInterface;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-//import org.modelmapper.ModelMapper;
-import org.mapstruct.factory.Mappers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -25,15 +22,11 @@ public class EmailController {
 
     private static final Logger LOGGER =  LogManager.getLogger( EmailController.class );
 
-    //@Autowired
-    //private ResultMapper resultDtoToResult;
-
     @Autowired
     private EmailServiceInterface emailService;
-    Map<String, Object> model = new HashMap<>();
+    //Map<String, Object> model = new HashMap<>();
 
     @PostMapping("/sendemail")
-    //@ResponseBody
     public ResponseEntity<Result> sendEmail(@RequestBody MailInfo mailInfo) throws Exception {
         ResultDto resultDto=emailService.sendEmail(mailInfo);
 
@@ -44,10 +37,7 @@ public class EmailController {
         headers.setContentType(MediaType.APPLICATION_JSON);
         headers.setAccept(Arrays.asList(MediaType.APPLICATION_JSON));
 
-        //ModelMapper modelMapper = new ModelMapper();
-        //Result result=resultDtoToResult.resultDtoToResult(resultDto);
         Result result=ResultMapper.INSTANCE.resultDtoToResult(resultDto);
-        //CarDto carDto = CarMapper.INSTANCE.carToCarDto( car );
         System.out.println(result.getMessage());
 
 

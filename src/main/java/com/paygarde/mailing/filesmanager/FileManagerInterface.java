@@ -23,5 +23,4 @@ public interface FileManagerInterface {
 
     public long fileSize(File f);
 
-    public boolean attachFiles(String []urls,Path tempFolder,MimeMessageHelper helper) throws MessagingException, MalformedUrlException, AttachmentMaxSizeExcededException, MalformedURLException;
 }

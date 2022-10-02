@@ -23,8 +23,8 @@ public class FileManager implements FileManagerInterface{
 
      private final Logger log = LoggerFactory.getLogger(this.getClass());
 
-     boolean state;
     private File desFile;
+
     @Value("${email.attachment.max.size}")
     private String fileMaxSize;
 
@@ -82,38 +82,6 @@ public class FileManager implements FileManagerInterface{
         return (s*10/temp);
     }
 
-    @Override
-    public boolean attachFiles(String[] urls, Path tempFolder, MimeMessageHelper helper) throws MessagingException, AttachmentMaxSizeExcededException, MalformedURLException {
-        state=true;
-        int attachedNumber=urls.length;
-        if (attachedNumber!=0){
-            for (String url : urls
-            ) {
-                if(this.urlIsValid(url)){
-                    File f=downloadFile(tempFolder.toFile(), url);
-                    Long fileSize=this.fileSize(f);
 
-                    if(fileSize<=Long.parseLong(fileMaxSize)){
-                        helper.addAttachment(f.getName(), f);
-                    } else{
-                        log.error("The size of the file "+f.getName()+" exceeds the allowed size");
-                        state=false;
-                      //  throw new AttachmentMaxSizeExcededException("The size of the file "+f.getName()+" exceeds the allowed size");
-
-                    }
-
-                } else {
-
-                    log.error("The Url: "+url+" is not valid");
-                    state=false;
-                    //throw new MalformedURLException("The Url: "+url+" is not valid");
-
-                }
-
-            }
-        }
-
-        return state;
-    }
 
 }

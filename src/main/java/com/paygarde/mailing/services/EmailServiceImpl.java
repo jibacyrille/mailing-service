@@ -1,5 +1,7 @@
 package com.paygarde.mailing.services;
 
+import com.paygarde.mailing.exceptions.AttachmentMaxSizeExcededException;
+import com.paygarde.mailing.exceptions.MalformedUrlException;
 import com.paygarde.mailing.filesmanager.FileManagerInterface;
 import com.paygarde.mailing.model.MailInfo;
 import com.paygarde.mailing.results.MailStatus;
@@ -7,6 +9,8 @@ import com.paygarde.mailing.results.ResultDto;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateException;
 //import org.modelmapper.ModelMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
@@ -32,27 +36,31 @@ public class EmailServiceImpl implements EmailServiceInterface {
    // @Autowired
     private final FileManagerInterface fileManager;
 
+    boolean state;
+
+    public MimeMessageHelper helper;
+
+    private final Logger log = LoggerFactory.getLogger(this.getClass());
+
     @Value("${email.template}")
     private String templateFolder;
 
     @Value("${email.attachment.folder.path}")
     private String tempFolderPath;
 
+    @Value("${email.attachment.max.size}")
+    private String fileMaxSize;
+
     public EmailServiceImpl(Configuration configuration, JavaMailSender javaMailSender, FileManagerInterface fileManager) {
         this.configuration = configuration;
         this.javaMailSender = javaMailSender;
         this.fileManager = fileManager;
     }
-
-    String name, username, email, mailSubject, templateName;
-    String filesUrlArray[];
-
+    private File templateFolderFile;
 
     @Override
     public ResultDto sendEmail(MailInfo mailInfo) throws MessagingException, IOException, TemplateException {
 
-        //ModelMapper modelMapper = new ModelMapper();
-        //ResultDto resultDto=modelMapper.map(mailInfo, ResultDto.class);
         ResultDto resultDto=new ResultDto();
         resultDto.setMailInfo(mailInfo);
 
@@ -61,38 +69,80 @@ public class EmailServiceImpl implements EmailServiceInterface {
         resultDto.setUid(emailId);
         resultDto.setCreationDataTime(emailCreationTime);
         resultDto.setStatus(MailStatus.CREATED);
+        resultDto.setMessage("Message created, awaiting to be sent");
 
         Path tempFolder = fileManager.createFolder(tempFolderPath);
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
-        MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
+        helper = new MimeMessageHelper(mimeMessage, MimeMessageHelper.MULTIPART_MODE_MIXED_RELATED,
                 StandardCharsets.UTF_8.name());
 
         helper.setTo(mailInfo.getEmail());
         helper.setSubject(mailInfo.getMailSubject());
         StringWriter stringWriter = new StringWriter();
-        configuration.setDirectoryForTemplateLoading(new File(
-                templateFolder));
+        templateFolderFile=new File(
+                templateFolder);
+
+        configuration.setDirectoryForTemplateLoading(templateFolderFile);
         configuration.getTemplate(mailInfo.getTemplateName()).process(mailInfo, stringWriter);
         String emailContent = stringWriter.getBuffer().toString();
         helper.setText(emailContent, true);
 
 
-        boolean res=fileManager.attachFiles(mailInfo.getFilesUrl(), tempFolder, helper);
-        if(res){
 
+        try{
+            attachFiles(mailInfo.getFilesUrl(), tempFolder);
             javaMailSender.send(mimeMessage);
-            fileManager.deleteFile(tempFolder.toFile());
+            //fileManager.deleteFile(tempFolder.toFile());
             resultDto.setStatus(MailStatus.CLOSED);
             resultDto.setMessage("Message sent successfully");
 
 
-        }else {
-            fileManager.deleteFile(tempFolder.toFile());
+        }catch (MessagingException | AttachmentMaxSizeExcededException | MalformedUrlException e){
+            log.error(e.toString());
+            //fileManager.deleteFile(tempFolder.toFile());
             resultDto.setStatus(MailStatus.FAILED);
             resultDto.setMessage("Couldn't send the message");
+        }finally {
+            fileManager.deleteFile(tempFolder.toFile());
+            return resultDto;
         }
 
-        return resultDto;
+
+    }
+
+
+    public boolean attachFiles(String[] urls, Path tempFolder) throws MessagingException, AttachmentMaxSizeExcededException, MalformedUrlException {
+        state=false;
+        int attachedNumber=urls.length;
+        if (attachedNumber!=0){
+            for (String url : urls
+            ) {
+                if(fileManager.urlIsValid(url)){
+                    File f=fileManager.downloadFile(tempFolder.toFile(), url);
+                    Long fileSize=fileManager.fileSize(f);
+
+                    if(fileSize<=Long.parseLong(fileMaxSize)){
+                        helper.addAttachment(f.getName(), f);
+                        state=true;
+                    } else{
+                        //log.error("The size of the file "+f.getName()+" exceeds the allowed size");
+                        state=false;
+                        throw new AttachmentMaxSizeExcededException("The size of the file "+f.getName()+" exceeds the allowed size");
+
+                    }
+
+                } else {
+
+                    //log.error("The Url: "+url+" is not valid");
+                    state=false;
+                    throw new MalformedUrlException("The Url: "+url+" is not valid");
+
+                }
+
+            }
+        }
+
+        return state;
     }
 
 
