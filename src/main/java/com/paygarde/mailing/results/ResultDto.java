@@ -13,10 +13,10 @@ import java.util.Date;
 
 public class ResultDto implements Serializable {
     private Date creationDataTime;
-    private MailStatus status;
     private String message;
     private MailInfo mailInfo;
     private String uid;
+    private MailStatus status;
 
     public Date getCreationDataTime() {
         return creationDataTime;

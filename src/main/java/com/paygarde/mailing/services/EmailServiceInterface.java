@@ -14,6 +14,10 @@ import java.nio.file.Path;
 
 public interface EmailServiceInterface {
     ResultDto sendEmail(MailInfo mailInfo) throws MessagingException, IOException, TemplateException;
+    void saveSentEmail(ResultDto resultDto) throws IOException;
+    void saveFailedEmail(ResultDto resultDto) throws IOException;
+    void jsonMailSave(ResultDto resultDto);
     boolean attachFiles(String[] urls, Path tempFolder) throws MessagingException, AttachmentMaxSizeExcededException, MalformedUrlException;
+    boolean priorityIsValid(String priority);
 
 }

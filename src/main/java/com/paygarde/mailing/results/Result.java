@@ -9,9 +9,9 @@ import java.util.Date;
 
 public class Result {
     private Date creationDataTime;
-    private MailStatus status;
     private String message;
     private String uid;
+    private MailStatus status;
 
     public Date getCreationDataTime() {
         return creationDataTime;

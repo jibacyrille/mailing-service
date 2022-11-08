@@ -39,16 +39,23 @@ public class FileManager implements FileManagerInterface{
     }
 
     @Override
-    public Path createFolder(String folderName)  {
-        /*File dossierImage = new File(folderName);
-        dossierImage.mkdir();
-        return dossierImage;*/
+    public Path createTempFolder(String folderName)  {
+
         try {
             return Files.createTempDirectory(folderName);
         } catch (IOException e) {
             e.printStackTrace();
             return null;
         }
+    }
+
+    @Override
+    public Path createFolder(String folderName)  {
+            File dossierImage = new File(folderName);
+            dossierImage.mkdir();
+            Path path=Path.of(dossierImage.getPath());
+        System.out.println(path);
+            return path;
     }
 
     @Override

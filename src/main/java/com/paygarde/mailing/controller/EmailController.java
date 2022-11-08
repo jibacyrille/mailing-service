@@ -11,6 +11,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -25,6 +27,7 @@ public class EmailController {
     @Autowired
     private EmailServiceInterface emailService;
     //Map<String, Object> model = new HashMap<>();
+
 
     @PostMapping("/sendemail")
     public ResponseEntity<Result> sendEmail(@RequestBody MailInfo mailInfo) throws Exception {
@@ -42,9 +45,12 @@ public class EmailController {
 
 
         if(result.getStatus().equals(MailStatus.CLOSED)){
+
+            emailService.saveSentEmail(resultDto);
             return new ResponseEntity<Result>(result, headers,HttpStatus.OK);
 
         }else {
+            emailService.saveFailedEmail(resultDto);
             return new ResponseEntity<Result>(result, headers, HttpStatus.BAD_REQUEST);
         }
 

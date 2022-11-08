@@ -8,6 +8,7 @@ public class MailInfo {
     String username;
     String email;
     String mailSubject;
+    String mailPriority;
     String templateName;
     String []filesUrl;
 }

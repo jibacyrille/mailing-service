@@ -15,6 +15,7 @@ public interface FileManagerInterface {
 
     public boolean deleteFile(File element);
 
+    public Path createTempFolder(String folderName) ;
     public Path createFolder(String folderName) ;
 
     public File downloadFile(File tempFolder, String fileUrl);
